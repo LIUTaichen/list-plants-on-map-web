@@ -24,14 +24,14 @@ class App extends Component {
  }
   render() {
     return (
-      <div className="App" >
-        <div className='container-fluid'>
-          <div className='row'>
-            <div id='list' className='col-lg-2'>
+      <div className="App h-100" >
+        <div className='container-fluid h-100'>
+          <div className='row h-100'>
+            <div id='list' className='col-lg-2 col-md-3 col-sm-4 h-100 col-6'>
                <ol id='ulist'></ol>
             </div>
 
-            <div id='mapid' className='col-lg-10'/>
+            <div id='mapid' className='col-lg-10 col-md-9 col-sm-8 h-100 .col-6'/>
           </div>
           </div>
       </div>
