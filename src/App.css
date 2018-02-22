@@ -27,8 +27,10 @@
   to { transform: rotate(360deg); }
 }
 
+
 #mapid{
-  }
+  height:900px;
+}
 
 #list{
   overflow-y: scroll;
