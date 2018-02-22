@@ -49,7 +49,7 @@ class App extends Component {
     console.log('getting data');
     var $ = require ('jquery')
     
-        fetch('http://54.252.161.117/api/new', {
+        fetch('https://dempseywoodgps.tk/api/new', {
           method: 'get'
         })
         .then(function (response) {
