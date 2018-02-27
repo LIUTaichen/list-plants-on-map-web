@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
-import L from 'leaflet';
+import L, { latLng } from 'leaflet';
 import './App.css';
 import request from 'request';
 import cheerio from 'cheerio';
@@ -8,6 +8,7 @@ import cheerio from 'cheerio';
 class App extends Component {
 
   constructor(props){
+    
     super(props);
     this.state = {
       data :  [],
@@ -47,7 +48,9 @@ class App extends Component {
 
   componentDidMount() {
     console.log('getting data');
-    var $ = require ('jquery')
+    var mymap;
+    var $ = require ('jquery');
+    var wellknown = require('wellknown');
     
         fetch('https://dempseywoodgps.tk/api/new', {
           method: 'get'
@@ -61,7 +64,7 @@ class App extends Component {
         .then(function (body) {
           console.log(body);
           
-          var mymap = L.map('mapid').setView([-36.914827, 174.8072903], 12);
+          mymap = L.map('mapid').setView([-36.914827, 174.8072903], 12);
           
               L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
                 attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
@@ -77,7 +80,8 @@ class App extends Component {
             let marker = L.marker([element['LastLat'],element['LastLon']], {
               title: element['VehicleName']
             });
-            marker.addTo(mymap);
+            marker.addTo(mymap)
+            .bindPopup(element['VehicleName']);
           });
           var list = $("#ulist");
           
@@ -85,7 +89,6 @@ class App extends Component {
             list.empty();
             mymap.eachLayer(function (layer){
               //console.log(layer.options['title']);
-              console.log(layer);
               var i = 1;
               if(layer.options['title']){
               if(mymap.getBounds().contains(layer._latlng)){
@@ -95,8 +98,80 @@ class App extends Component {
           });
          });
 
-        })
+        }).then(function (){
+          //let url = 'http://webapi.blackhawktracking.com/api/Vehicle?filterVehicles=true';
+          let url = 'http://webapi.blackhawktracking.com/api/GeoFence?includeGeometries=true';
+           return fetch(url,{
+             headers:{
+              token: '034A9768-D9F0-4D4D-9BB1-02E3932A44E3'
+             }
+           })
+           .then(function(response){
+              return response.json();
+           });
+
+        }).then(function(gpsjson){
+          console.log(gpsjson);
+          gpsjson.forEach(geofence => {
+              //console.log(geofence);
+              let polygon = wellknown(geofence.WellKnownText);
+
+              if(!polygon){
+                console.log("geofence " + geofence.Description + " is not a converted to a polygon, skipping it");
+                return;
+              }
+              let latLngs = [];
+             console.log(polygon.coordinates);
+             if(polygon.type === 'Polygon'){
+                polygon.coordinates.forEach(pointsArray => {
+                  let simplePoly = [];
+                  latLngs.push(simplePoly);
+                  pointsArray.forEach(points =>{
+                    simplePoly.push([points[1], points[0]]);
+                  });
+                });
+              }else{
+                polygon.coordinates.forEach(level1 => {
+                  let simplePoly = [];
+                  latLngs.push(simplePoly);
+                  level1[0].forEach(points =>{
+                    simplePoly.push([points[1], points[0]]);
+                  });
+                });
+              }
+              
+              console.log(latLngs);
+              let mapFeature = L.polygon(latLngs, {
+                color: 'red',
+                fillColor: '#f03',
+                fillOpacity: 0.5,
+              });
+              console.log("adding  " + geofence.Description + " to map");
+              mapFeature.bindPopup(geofence.Description);
+              mapFeature.on('click', function(e){
+                let list = $("#ulist");
+                list.empty();
+                let bounds = e.target.getBounds();
+                mymap.eachLayer(function (layer){
+                  //console.log(layer.options['title']);
+                  var i = 1;
+                  if(layer.options['title']){
+                    if(bounds.contains(layer._latlng)){
+                    list.append('<li>'+ layer.options['title'] +'</li>');
+                  }
+                }
+              });
+              });
+
+              mapFeature.addTo(mymap);
+          });
+        });
+
+       
+          
       }
+
+      
       
      
     
