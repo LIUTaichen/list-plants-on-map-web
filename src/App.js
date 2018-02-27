@@ -100,7 +100,7 @@ class App extends Component {
 
         }).then(function (){
           //let url = 'http://webapi.blackhawktracking.com/api/Vehicle?filterVehicles=true';
-          let url = 'http://webapi.blackhawktracking.com/api/GeoFence?includeGeometries=true';
+          let url = 'https://webapi.blackhawktracking.com/api/GeoFence?includeGeometries=true';
            return fetch(url,{
              headers:{
               token: '034A9768-D9F0-4D4D-9BB1-02E3932A44E3'
