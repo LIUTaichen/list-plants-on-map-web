@@ -4,6 +4,7 @@ import L, { latLng } from 'leaflet';
 import './App.css';
 import request from 'request';
 import cheerio from 'cheerio';
+import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
 
 class App extends Component {
 
@@ -148,33 +149,53 @@ class App extends Component {
               });
               console.log("adding  " + geofence.Description + " to map");
               mapFeature.bindPopup(geofence.Description);
+              mapFeature.Name = geofence.Name;
               mapFeature.on('click', function(e){
                 let list = $("#ulist");
                 list.empty();
-                let bounds = e.target.getBounds();
+                let targetGeofence = e.target;
                 mymap.eachLayer(function (layer){
                   //console.log(layer.options['title']);
                   var i = 1;
                   if(layer.options['title']){
-                    if(bounds.contains(layer._latlng)){
+                    if(booleanPointInPolygon(layer.toGeoJSON(),targetGeofence.toGeoJSON())){
                     list.append('<li>'+ layer.options['title'] +'</li>');
                   }
                 }
               });
               });
-
+            
               mapFeature.addTo(mymap);
+          })
+        }).then(function(){
+          let point;
+          let polygon9468;
+          let polygon9431;
+          mymap.eachLayer(function (layer){
+            //console.log(layer.options['title']);
+            var i = 1;
+            if(layer.options['title']){
+              if(layer.options['title'] ==='HC01'){
+                point = layer;
+              }
+            }
+            if(layer.Name === '9431'){
+              polygon9431 = layer;
+            }
+            if(layer.Name === '9468'){
+              polygon9468 = layer;
+            }
           });
+          console.log(point);
+          console.log(polygon9468);
+          console.log(polygon9431);
+          console.log(polygon9468._latlngs[0]);
+          let isIn9468 = booleanPointInPolygon(point.toGeoJSON(),polygon9468.toGeoJSON());
+          console.log(isIn9468);
+          console.log( booleanPointInPolygon(point.toGeoJSON(),polygon9431.toGeoJSON()));
+
         });
-
-       
-          
       }
-
-      
-      
-     
-    
   }
 
 export default App;
