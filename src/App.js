@@ -159,10 +159,11 @@ class App extends Component {
                   var i = 1;
                   if(layer.options['title']){
                     if(booleanPointInPolygon(layer.toGeoJSON(),targetGeofence.toGeoJSON())){
-                    list.append('<li>'+ layer.options['title'] +'</li>');
+                      list.append('<li>'+ layer.options['title'] +'</li>');
+                    }
                   }
-                }
-              });
+                
+                });
               });
             
               mapFeature.addTo(mymap);
